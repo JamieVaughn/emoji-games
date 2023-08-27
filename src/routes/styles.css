@@ -1,0 +1,202 @@
+@import '@fontsource/fira-mono';
+
+:root {
+	--kings-crown: url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 10 70 80%22><foreignObject width=%22100px%22 height=%22100px%22><div xmlns=%22http://www.w3.org/1999/xhtml%22 style=%22color:transparent;background:linear-gradient(0deg, gold 25%, lemonchiffon 60%, crimson 98%);background-clip:text;-webkit-background-clip:text;font-size:70px%22>👑</div></foreignObject></svg>");
+	--cell-side: 4rem;
+	--grid-gap: 3px;
+	--border: 3px;
+	--grid-columns: 8;
+	--grid-lines: 8;
+	--grid-tile-size: calc(calc(calc(2 * var(--border)) + var(--grid-gap) ) + var(--cell-side));
+	--hex-buffer: calc(var(--grid-columns) + 0.5);
+	--board-padding: 5px;
+	--board-color: linen;
+	--selection-color: #DC143C;
+	--selection-color-light: #dc143c75;
+	--deploy-color-light: #00bfff75;
+	--build-color-light: #ffd70075;
+/* sveltekit defaults */
+	--font-body: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+		Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	--font-mono: 'Fira Mono', monospace;
+	--color-bg-0: rgb(202, 216, 228);
+	--color-bg-1: hsl(209, 36%, 86%);
+	--color-bg-2: hsl(224, 44%, 95%);
+	--color-theme-1: #ff3e00;
+	--color-theme-2: #4075a6;
+	--color-text: rgba(0, 0, 0, 0.7);
+	--column-width: 42rem;
+	--column-margin-top: 4rem;
+	font-family: var(--font-body);
+	color: var(--color-text);
+}
+
+body {
+	min-height: 100vh;
+	margin: 0;
+	background-attachment: fixed;
+	background-color: var(--color-bg-1);
+	background-size: 100vw 100vh;
+	background-image: radial-gradient(
+			50% 50% at 50% 50%,
+			rgba(255, 255, 255, 0.75) 0%,
+			rgba(255, 255, 255, 0) 100%
+		),
+		linear-gradient(180deg, var(--color-bg-0) 0%, var(--color-bg-1) 15%, var(--color-bg-2) 50%);
+}
+
+h1,
+h2,
+p {
+	font-weight: 400;
+}
+
+p {
+	line-height: 1.5;
+}
+
+a {
+	color: var(--color-theme-1);
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+h1 {
+	font-size: 2rem;
+	text-align: center;
+}
+
+h2 {
+	font-size: 1rem;
+}
+
+pre {
+	font-size: 16px;
+	font-family: var(--font-mono);
+	background-color: rgba(255, 255, 255, 0.45);
+	border-radius: 3px;
+	box-shadow: 2px 2px 6px rgb(255 255 255 / 25%);
+	padding: 0.5em;
+	overflow-x: auto;
+	color: var(--color-text);
+}
+
+.text-column {
+	display: flex;
+	max-width: 48rem;
+	flex: 0.6;
+	flex-direction: column;
+	justify-content: center;
+	margin: 0 auto;
+}
+
+input,
+button {
+	font-size: inherit;
+	font-family: inherit;
+}
+
+button:focus:not(:focus-visible) {
+	outline: none;
+}
+
+@media (min-width: 720px) {
+	h1 {
+		font-size: 2.4rem;
+	}
+}
+
+.visually-hidden {
+	border: 0;
+	clip: rect(0 0 0 0);
+	height: auto;
+	margin: 0;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+	white-space: nowrap;
+}
+
+.conscript {grid-area: conscript;}
+.laborer { grid-area: laborer;}
+.engineer { grid-area: engineer;}
+.miner { grid-area: miner;}
+.alchemist { grid-area: alchemist;}
+.pyromancer { grid-area: pyromancer;}
+.soldier { grid-area: soldier;}
+.rider { grid-area: rider;}
+.bowman { grid-area: bowman;}
+.war-elephant { grid-area: warelephant;}
+.trebuchet { grid-area: siege;}
+
+.easy .cell:nth-of-type(16n + 1),
+.easy .cell:nth-of-type(16n + 2),
+.easy .cell:nth-of-type(16n + 3),
+.easy .cell:nth-of-type(16n + 4),
+.easy .cell:nth-of-type(16n + 5),
+.easy .cell:nth-of-type(16n + 6),
+.easy .cell:nth-of-type(16n + 7),
+.easy .cell:nth-of-type(16n + 8) {
+    /* background-color: crimson; */
+   transform: translateX(calc(var(--cell-side) / 1.6));
+}
+.med .cell:nth-of-type(24n + 1),
+.med .cell:nth-of-type(24n + 2),
+.med .cell:nth-of-type(24n + 3),
+.med .cell:nth-of-type(24n + 4),
+.med .cell:nth-of-type(24n + 5),
+.med .cell:nth-of-type(24n + 6),
+.med .cell:nth-of-type(24n + 7),
+.med .cell:nth-of-type(24n + 8),
+.med .cell:nth-of-type(24n + 9),
+.med .cell:nth-of-type(24n + 10),
+.med .cell:nth-of-type(24n + 11),
+.med .cell:nth-of-type(24n + 12) {
+    /* background-color: crimson; */
+   transform: translateX(calc(var(--cell-side) / 1.6));
+}
+.hard .cell:nth-of-type(40n + 1),
+.hard .cell:nth-of-type(40n + 2),
+.hard .cell:nth-of-type(40n + 3),
+.hard .cell:nth-of-type(40n + 4),
+.hard .cell:nth-of-type(40n + 5),
+.hard .cell:nth-of-type(40n + 6),
+.hard .cell:nth-of-type(40n + 7),
+.hard .cell:nth-of-type(40n + 8),
+.hard .cell:nth-of-type(40n + 9),
+.hard .cell:nth-of-type(40n + 10),
+.hard .cell:nth-of-type(40n + 11),
+.hard .cell:nth-of-type(40n + 12),
+.hard .cell:nth-of-type(40n + 13),
+.hard .cell:nth-of-type(40n + 14),
+.hard .cell:nth-of-type(40n + 15),
+.hard .cell:nth-of-type(40n + 16),
+.hard .cell:nth-of-type(40n + 17),
+.hard .cell:nth-of-type(40n + 18),
+.hard .cell:nth-of-type(40n + 19),
+.hard .cell:nth-of-type(40n + 20) {
+    /* background-color: crimson; */
+   transform: translateX(calc(var(--cell-side) / 1.6));
+}
+
+[class*='🌳'] {
+	font-size: 1.75rem;
+}
+[class*='🌲'] {
+	font-size: 2.25rem;
+}
+.dagger {
+	display: inline-block;
+	transform: rotate(150deg);
+}
+.standard {
+	transform: rotate(0deg)
+}
+
+.deploy { background-color: var(--deploy-color-light);}
+.muster {background-color: var(--selection-color-light);}
+.muster .troop { background: #fff;}

@@ -197,6 +197,11 @@ button:focus:not(:focus-visible) {
 	transform: rotate(0deg)
 }
 
+.build { background-color: var(--build-color-light);}
 .deploy { background-color: var(--deploy-color-light);}
 .muster {background-color: var(--selection-color-light);}
 .muster .troop { background: #fff;}
+.selected {
+		outline: 2px solid var(--color-theme-1);
+    border: 2px dashed dodgerblue;
+	}

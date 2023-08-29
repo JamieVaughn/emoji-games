@@ -285,10 +285,6 @@
 		border: 2px solid var(--color-theme-2);
 	}
 
-	.selected {
-		outline: 2px solid var(--color-theme-1);
-	}
-
 	.controls {
 		text-align: center;
 		justify-content: center;

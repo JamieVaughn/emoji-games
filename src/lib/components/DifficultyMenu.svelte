@@ -43,4 +43,11 @@
 	.settings input:checked + label {
 		background-color: skyblue;
 	}
+	label, button {
+    font-size: 1rem;
+    border: 1px solid steelblue;
+    border-radius: 4px;
+    padding: 4px;
+    margin: 0 2px;
+	}
 </style>

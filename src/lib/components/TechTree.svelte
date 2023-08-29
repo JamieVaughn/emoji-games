@@ -42,8 +42,17 @@ import Tooltip from "./Tooltip.svelte";
     </details>
 
 <style>
+  details {
+    padding: 1rem;
+    text-align: center;
+  }
+  h6 {
+    margin: 0;
+  }
   .guide {
     display: grid;
+    gap: 4px 0;
+    margin: 0 auto;
     width: fit-content;
     grid-template-columns: repeat(4 , 1fr);
     grid-template-rows: repeat(4, 1fr);
@@ -53,8 +62,7 @@ import Tooltip from "./Tooltip.svelte";
     "engineer  rider     bowman   alchemist"
     "siege   warelephant   ...    pyromancer ";
     justify-content: center;
-    margin: 0 auto;
-    padding: 8px;
+    padding: 4px;
 }
 .guide p {
     border: 1px solid steelblue;
@@ -65,5 +73,6 @@ import Tooltip from "./Tooltip.svelte";
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%;
 }
 </style>

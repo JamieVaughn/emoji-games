@@ -1,23 +1,29 @@
 <script lang='ts'>
-import { units } from "../data/pieces";
+import { units, type UnitsSymbols } from "../data/pieces";
 
 import AbilityMenu from "./AbilityMenu.svelte";
 import UnitCard from './UnitCard.svelte'
 import { canReach, draw, isEdge, growthFactor } from "../helpers";
-import { onDestroy, onMount } from "svelte";
+import { onDestroy, onMount, SvelteComponent } from "svelte";
+
+type TroopType = {
+  type: UnitsSymbols;
+  total: number;
+  player: number;
+};
 
 // type Props = delay: number, dimension: number, resources: Array<{}>, playing: boolean
-export let delay: number, dimension: number, board: () => any[], resources, playing: boolean;
+export let delay: number, dimension: number, board: () => any[], resources: Array<Record<string, any>>, playing: boolean;
 const decay = false;
-  let world // ref for world component
+  let world: SvelteComponent // ref for world component
   // signals
   let inspect = false
   let apm = 0 // increment for every user input event
   let forts = [0]
-  let muster = [null, null] // [index, total]
+  let muster: [any, any] = [null, null] // [index, total]
   let selected: any = null
   let active: Array<{id: string, type: string, ability: string[], total?: number}> = [] // 
-  let troops: Array<any> = Array(dimension ** 2)
+  let troops: Array<TroopType> = Array(dimension ** 2)
     .fill(0)
     .map(() => ({ type: "c", total: 0, player: 1 }))
   // const [boost, setBoost] = createSignal(1)
@@ -62,7 +68,7 @@ const decay = false;
       console.log(`board: ${dimension}x${dimension} => ${troops.length}`, {board: board()})
       console.log(`selected: `, selected)
     }
-  }, 3000 || delay)
+  }, delay * 3 || 3000)
   })
   
   const useInspect = (e: MouseEvent) => {
@@ -75,7 +81,7 @@ const decay = false;
     cancelAnimationFrame(animationFrame)
   })
   
-  const deployMusteredTroops = (e: MouseEvent, unit: any, target: any) => {
+  const deployMusteredTroops = (e: MouseEvent, unit: TroopType, target: any) => {
     // e.preventDefault();
     // console.log('sel', target, unit, muster[1])
     selected = [target, muster[1]];
@@ -92,7 +98,7 @@ const decay = false;
     ) {
       muster = [null, null];
     }
-    let delta;
+    let delta: number;
     if (troops[target].total + unit.total >= units[unit.type].cap) {
       delta = units[unit.type].cap - unit.total;
     }
@@ -105,9 +111,9 @@ const decay = false;
 
     if (
       canReach(muster)
-        .reduce((acc, cur) => {
+        .reduce((acc: Array<any>, cur) => {
           if (isEdge(muster[0], target, dimension)) return acc;
-          return [...acc, muster[0] + cur];
+          return acc.concat(muster[0] + cur);
         }, [])
         .includes(target)
     ) {
@@ -128,7 +134,7 @@ const decay = false;
     activateAbility(e, unit, target)
   };
 
-  const musterTroops = (unit, id) => {
+  const musterTroops = (unit: TroopType, id) => {
     console.log('muster', active, unit, id);
     if (active.find((a) => a.id === id)) return;
     if (typeof id === "number" && unit.total > 0) {
@@ -137,7 +143,7 @@ const decay = false;
     }
   };
 
-  const applyCooldown = (id, unit, domref) => {
+  const applyCooldown = (id, unit: TroopType, domref) => {
     active = active.concat({ id, ...unit })
     let cd = units[unit.type].cooldown
     domref.style.setProperty("animation-duration", cd + "s");
@@ -171,7 +177,7 @@ const decay = false;
   };
   const buildZones = (target) => {
     if (muster[0] === null) return "";
-    if (muster[0] === target) return styles.muster;
+    if (muster[0] === target) return 'muster';
     if (
       canReach(muster)
         .reduce((acc, cur) => {
@@ -180,7 +186,7 @@ const decay = false;
         }, [])
         .includes(target)
     ) {
-      return styles.build;
+      return 'build';
     }
     return "";
   };
@@ -229,7 +235,8 @@ const decay = false;
                   on:dragend={(e) => {console.log('endcap', e); deployMusteredTroops(e, unit, i) }}
                   on:drop={e => {if(deploymentZones(i)) {deployMusteredTroops(e, unit, i);}}}
                   on:dragover={e => e.preventDefault()}
-                ><span style={'opacity: 0.5'}>{i}</span>
+                >
+                <span style={'opacity: 0.5'}>{i}</span>
                   {#if troops && (apm || tick) && unit.total > 0}
                     <div
                       class={`troop ${selected?.[0] === i ? 'selected' : ''} ${active.find(a => a.id === String(i)) ? 'oncooldown' : ''}`}
@@ -243,8 +250,11 @@ const decay = false;
                         {units[unit.type].icon}
                       </span>
                     </div>
-                    {#if active?.id === i}
-                      <AbilityMenu abilities={units[unit.type].abilities} on:contextmenu={(e) => {e.preventDefault(); activateAbility(e, unit, i)}} />
+                    {#if active?.find(a => Number(a.id) === i) && false}
+                      <AbilityMenu 
+                        abilities={units[unit.type].abilities} 
+                        on:contextmenu={(e) => {e.preventDefault(); activateAbility(e, unit, i)}} 
+                      />
                     {/if}
                   {/if}
                   {#if typeof resources?.[i] === "string"}
@@ -260,7 +270,7 @@ const decay = false;
         {#if troops && selected}
           <UnitCard selected={selected} />
         {:else}
-        <UnitCard empty={true}></UnitCard>
+          <UnitCard empty={true} />
         {/if}
       </div>
     </div>
@@ -329,7 +339,6 @@ const decay = false;
 .cell:hover, .muster:hover {
     outline: 3px dashed deeppink;
 }
-.build { background-color: var(--build-color-light);}
 .troop {
     background: #ffffff70;
     border: 2px solid rgba(255, 255, 255, 0.8);
@@ -343,5 +352,29 @@ const decay = false;
     padding: 0 2px;
     z-index: 1;
     transform: rotateX(-25deg) rotateY(15deg) rotateZ(53deg) scaleX(1) scaleY(1.75);
+}
+.build { background-color: var(--build-color-light);}
+.deploy { background-color: var(--deploy-color-light);}
+.muster {background-color: var(--selection-color-light);}
+.muster .troop { background: #fff;}
+.selected {
+		outline: 2px solid var(--color-theme-1);
+    border: 2px dashed dodgerblue;
+	}
+[class*='troop'].oncooldown {
+	background: linear-gradient(to right, #f7456370 50%, #ffffff70 50%);
+	background-size: 200% 100%;
+	background-position: 99% 0%;
+	animation: linear 0s 1 none cooldown;
+	animation-duration: 3s;
+}
+@keyframes cooldown {
+    0% {
+        background-position: 00% 0%;
+	}
+    100% {
+        background-position: 100% 0%;
+        
+    }
 }
 </style>

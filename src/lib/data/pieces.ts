@@ -32,6 +32,7 @@ export type UnitType = {
   cooldown?: number;
   abilities?: string[];
 }
+
 const unitBuilder = ({
   name,
   icon,
@@ -166,6 +167,10 @@ export const units = {
     abilities: ["alchemist", "Greek-fire", "trample"]
   })
 };
+
+export type UnitsSymbols = keyof typeof units;
+
+
 const mapBuilder = () => (size: number) => {
   let features = ["⛰️", "⛰️", "⛰️", "⛰️", "🌲", "🌲", "🌳", "🌳", "🌲", "🌲"];
   let d = Number(size);

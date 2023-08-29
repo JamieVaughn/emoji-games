@@ -105,20 +105,25 @@ onMount(() => {
   }, 1000)
 })
 
-  const getMinutes = () => {
-    const mins = count/60
+  const getMinutes = (num: number) => {
+    const mins = num/60
     return mins > 1 ? mins.toFixed(0) : '00'
   }
-  const getSeconds = () => {
-    const sec = count%60 
+  const getSeconds = (num: number) => {
+    const sec = num%60 
     return sec > 9 ? sec : '0'+String(sec)
   }
 </script>
 
 <section class='kings'>
   <h1 class='center'>King's Corvée</h1>
-  <h6 class='center'>A Cooldown-based Strategy game.</h6>
-  <div class='flex'><span>{getMinutes()}:{getSeconds()}</span><button on:click={() => playing = !playing}>{playing ? 'Pause' : 'Resume'}</button></div>
+  <h6>A Cooldown-based Strategy game.</h6>
+  <time>
+    <span>{getMinutes(count)}:{getSeconds(count)}</span>
+    <button on:click={() => playing = !playing}>
+      {playing ? 'Pause' : 'Resume'}
+    </button>
+  </time>
   <Difficulty setDimension={setDimension} />
   <span><TechTree /></span>
 </section>
@@ -129,11 +134,24 @@ onMount(() => {
 	background: #f6f6f6;
     color: #333;
 }
-.kings :is(label, button) {
+time {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
     font-size: 1rem;
-    border: 1px solid steelblue;
-    border-radius: 4px;
-    padding: 4px;
-    margin: 0 2px;
+    margin: 1rem auto;
+}
+time span {
+  color: #555;
+}
+h1 {
+  margin-bottom: 8px;
+}
+h6 {
+  width: 100%;
+  text-align: center;
+  margin: 0;
 }
 </style>

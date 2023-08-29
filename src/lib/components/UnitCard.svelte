@@ -15,7 +15,7 @@ import { units } from '../data/pieces'
   <h4>Select Troops</h4>
 </section>
 {:else}
-      <section class={`unitcard mustered`}>
+      <section class='unitcard mustered'>
         <h3 data-capital>{unit.name}</h3> 
         <span>
           <code>{Math.round(total)} troops @ ({selected?.[0] ?? 0 % 8},{ Math.floor(selected?.[0] ?? 0 / 8)})</code>
@@ -47,19 +47,20 @@ import { units } from '../data/pieces'
     color: navy;
 }
 .unitcard :is(h3) {
-    margin: 4px 0;
+    margin: 2px 0;
 }
 .unitcard :is(h4) {
-    justify-self: end;
+  margin: 2px 0;
+  justify-self: end;
 }
 .unitcard :is([data-capital]) {
-    text-transform: capitalize;
+  text-transform: capitalize;
 }
 .unitcard :is(span) {
     color: royalblue;
     font-size: 12px;
 }
-.mustered {
+.unitcard.mustered {
     grid-template-columns: min-content 125px;
     align-items: center;
 }

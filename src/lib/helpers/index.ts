@@ -1,17 +1,11 @@
 import { units } from '../data/pieces'
+import type { TroopType } from "$lib/types";
 
-export function isEdge(musterId, adjId, dimension) {
-  return (
-    (adjId % dimension === 0 && (musterId + 1) % dimension === 0) ||
-    ((adjId + 1) % dimension === 0 && musterId % dimension === 0)
-  );
-}
 
 export function growthFactor(cap, n, boost = 1) {
   // the 'boost' in the numerator can be changed to 2 then 3 with research to boost growth
   return boost / (1 / (1 - n / cap) + Math.exp(-n));
 }
-
 
 // If fps is at 10 so
 // each frame must take 100ms
@@ -32,10 +26,17 @@ export function handleFallback<T>(item: T, index:number): Element {
   throw new Error('Function not implemented.')
 }
 
-export const canReach = ([pos, unit], dimension = 8) => {
+export function isEdge(musterId: number, adjId: number, dimension: number) {
+  return (
+    (adjId % dimension === 0 && (musterId + 1) % dimension === 0) ||
+    ((adjId + 1) % dimension === 0 && musterId % dimension === 0)
+  );
+}
+
+export const canReach = ([pos, unit]: [number, TroopType], dimension: number = 8) => {
   let row = Math.ceil(pos / dimension);
   let col = pos % dimension;
-  const speed = units?.[unit?.type]?.speed ?? 0
+  const speed = units[unit?.type]?.speed ?? 0
   const iter = Array.from({length: speed}).map((_, i) => i )
   const west = iter.map(w => pos + w)
   const east = iter.map(e => pos - e)
@@ -44,10 +45,15 @@ export const canReach = ([pos, unit], dimension = 8) => {
   const se = iter.map(se => pos + se*dimension + 1)
 
   const reach = [...west, ...east, ...north, ...south, ...se].filter(p => p < (dimension ** 2) - 1 && p >= 0)
-  console.log('reach', pos, reach)
+  // console.log('reach', pos, reach)
   let coef = row % 2 === 0 ? -1 * speed : 1 * speed;
   if (row % 2 === 0 && col === 0) coef = 1 * speed;
   if (row % 2 === 1 && col === 0) coef = 0;
   // return reach
-  return [-dimension + coef, -dimension, -1, 1, dimension, dimension + coef];
+  return (
+    new Set(
+      [-dimension + coef, -dimension, -1, 1, dimension, dimension + coef]
+      .filter(coord => coord >= 0 && coord < dimension ** 2 && !isEdge(pos, coord, dimension))
+      )
+  );
 }

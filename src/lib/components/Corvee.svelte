@@ -20,7 +20,7 @@ import { initResources } from "../data/pieces";
   };
   let board = () => Array(dimension ** 2)
                       .fill(0)
-                      .map(() => ({ type: "c", total: 0, player: 1 }));
+                      .map((_, i) => ({ type: "c", total: 0, player: 1 }));
 
   // const [dragState, setDragState] = createSignal({
   //     isDragging: false,

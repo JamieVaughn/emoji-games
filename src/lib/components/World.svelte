@@ -4,7 +4,7 @@ import { units, type UnitsSymbols } from "../data/pieces";
 import AbilityMenu from "./AbilityMenu.svelte";
 import UnitCard from './UnitCard.svelte'
 import { canReach, draw, isEdge, growthFactor } from "../helpers";
-import { onDestroy, onMount, SvelteComponent } from "svelte";
+import { onDestroy, onMount } from "svelte";
 
 type TroopType = {
   type: UnitsSymbols;
@@ -13,17 +13,17 @@ type TroopType = {
 };
 
 // type Props = delay: number, dimension: number, resources: Array<{}>, playing: boolean
-export let delay: number, dimension: number, board: () => any[], resources: Array<Record<string, any>>, playing: boolean;
+export let delay: number, dimension: number, board: () => any[], resources: { [key: number]: string }, playing: boolean;
 const decay = false;
-  let world: SvelteComponent // ref for world component
+  let world: HTMLDivElement // ref for world component
   // signals
   let inspect = false
   let apm = 0 // increment for every user input event
   let forts = [0]
   let muster: [any, any] = [null, null] // [index, total]
   let selected: any = null
-  let active: Array<{id: string, type: string, ability: string[], total?: number}> = [] // 
-  let troops: Array<TroopType> = Array(dimension ** 2)
+  let active: {id: number, type: string, ability: string[], total?: number}[] = [] // 
+  let troops: TroopType[] = Array(dimension ** 2)
     .fill(0)
     .map(() => ({ type: "c", total: 0, player: 1 }))
   // const [boost, setBoost] = createSignal(1)
@@ -64,8 +64,8 @@ const decay = false;
     if(inspect) {
       console.log(`World Clock: ${playing ? tick : `paused - ${tick}`} seconds`)
       console.log("active", active, 'muster', muster);
-      console.log('resources', resources)
       console.log(`board: ${dimension}x${dimension} => ${troops.length}`, {board: board()})
+      console.log('resources', resources)
       console.log(`selected: `, selected)
     }
   }, delay * 3 || 3000)
@@ -134,7 +134,7 @@ const decay = false;
     activateAbility(e, unit, target)
   };
 
-  const musterTroops = (unit: TroopType, id) => {
+  const musterTroops = (unit: TroopType, id: number) => {
     console.log('muster', active, unit, id);
     if (active.find((a) => a.id === id)) return;
     if (typeof id === "number" && unit.total > 0) {
@@ -143,8 +143,8 @@ const decay = false;
     }
   };
 
-  const applyCooldown = (id, unit: TroopType, domref) => {
-    active = active.concat({ id, ...unit })
+  const applyCooldown = (id: number, unit: TroopType, domref: HTMLElement) => {
+    active = active.concat({ ...unit, id })
     let cd = units[unit.type].cooldown
     domref.style.setProperty("animation-duration", cd + "s");
     let timeout: NodeJS.Timeout = setTimeout(() => {
@@ -153,40 +153,32 @@ const decay = false;
     }, cd * 1000);
   }
 
-  const activateAbility = (e, unit, id) => {
+  const activateAbility = (e, unit, id: number) => {
     e.preventDefault();
     selected = [id, unit]
-    console.log('activate', e.currentTarget, unit, id, units[unit.type].abilities);
-    if (active.find((a) => a.id === id)) return;
-    let troop = e.target.children.length ? e.target.children[0] : e.currentTarget
-    if (typeof id === "number" && unit.total > 0) applyCooldown(id, unit, troop)
+    if (active.find(a => (a.id === id))) return;
+    let troopEl = document.querySelector('.selected') // e.target.children.length ? e.target.children[1] : e.currentTarget
+    console.log('activate', id, unit, troopEl);
+    if (typeof id === "number" && unit.total > 0) applyCooldown(id, unit, troopEl)
   };
-  const deploymentZones = (target) => {
-    if (muster[0] === null) return "";
-    if (muster[0] === target) return 'muster'
+
+  const isReachableZone = (target: number, css: 'deploy' | 'build') => {
+    console.log('reachable', muster, canReach(muster)
+        .reduce((acc: Array<number>, cur: number) => {
+          if (isEdge(muster?.[0], target, dimension)) return acc;
+          return [...acc, muster?.[0] + cur];
+        }, []), target)
+    if (muster?.[0] === null) return "";
+    if (muster?.[0] === target) return 'muster'
     if (
       canReach(muster)
-        .reduce((acc, cur) => {
-          if (isEdge(muster[0], target, dimension)) return acc;
-          return [...acc, muster[0] + cur];
-        }, [])
-        .includes(target)
-    )
-      return 'deploy';
-    return "";
-  };
-  const buildZones = (target) => {
-    if (muster[0] === null) return "";
-    if (muster[0] === target) return 'muster';
-    if (
-      canReach(muster)
-        .reduce((acc, cur) => {
-          if (isEdge(muster[0], target, dimension)) return acc;
-          return [...acc, muster[0] + cur];
+        .reduce((acc: Array<number>, cur: number) => {
+          if (isEdge(muster?.[0], target, dimension)) return acc;
+          return [...acc, muster?.[0] + cur];
         }, [])
         .includes(target)
     ) {
-      return 'build';
+      return css;
     }
     return "";
   };
@@ -207,9 +199,11 @@ const decay = false;
       deployMusteredTroops(e, unit, i())
       muster = [null, null]
     } else {
-      musterTroops(unit, i())
+      musterTroops(unit, i)
     }
   }
+
+  $: active = active
 </script>
 
     <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -227,23 +221,25 @@ const decay = false;
         >
           {#each troops as unit, i}
                 <div
-                  class={`cell ${
-                    forts.includes(i) ? 'king' : ""
-                  } ${deploymentZones(i)}`}
+                  class:cell={true}
+                  class:king={forts.includes(i)}
+                  class={isReachableZone(i, 'deploy')}
                   on:click={(e) => deployMusteredTroops(e, unit, i)}
                   on:dragstart={(e) => {console.log('dragstart')}}
                   on:dragend={(e) => {console.log('endcap', e); deployMusteredTroops(e, unit, i) }}
-                  on:drop={e => {if(deploymentZones(i)) {deployMusteredTroops(e, unit, i);}}}
+                  on:drop={e => {if(isReachableZone(i, 'deploy')) {deployMusteredTroops(e, unit, i);}}}
                   on:dragover={e => e.preventDefault()}
                 >
                 <span style={'opacity: 0.5'}>{i}</span>
                   {#if troops && (apm || tick) && unit.total > 0}
                     <div
-                      class={`troop ${selected?.[0] === i ? 'selected' : ''} ${active.find(a => a.id === String(i)) ? 'oncooldown' : ''}`}
+                      class:selected={selected?.[0] === i}
+                      class:oncooldown={active.find(a => a.id === i)}
+                      class='troop'
                       on:click={(e) => { e.stopPropagation(); selected = [i, unit] }}
                       on:mousedown={(e) => { e.stopPropagation(); musterTroops(unit, i) }}
                       draggable='true'
-                      on:contextmenu={e => {e.preventDefault(); active = active.concat({id: i, ...unit})}}
+                      on:contextmenu={e => {e.preventDefault(); active = [...active, {...unit, id: i}]}}
                     >
                       <span>{Math.round(troops[i].total)}</span>
                       <span class={units[unit.type].css}>

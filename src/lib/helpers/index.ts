@@ -35,7 +35,7 @@ export function handleFallback<T>(item: T, index:number): Element {
 export const canReach = ([pos, unit], dimension = 8) => {
   let row = Math.ceil(pos / dimension);
   let col = pos % dimension;
-  const speed = units[unit.type]?.speed
+  const speed = units?.[unit?.type]?.speed ?? 0
   const iter = Array.from({length: speed}).map((_, i) => i )
   const west = iter.map(w => pos + w)
   const east = iter.map(e => pos - e)

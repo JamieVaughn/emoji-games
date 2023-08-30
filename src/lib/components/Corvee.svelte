@@ -13,7 +13,7 @@ import { initResources } from "../data/pieces";
   let delay = 1000
   let dimension = 8
   // derived signals
-  const resources = () => initResources(dimension);
+  const resources = initResources(dimension);
   const positionTwo = () => dimension ** 2 -1
   const setDimension = (num: number) => {
     dimension = num;

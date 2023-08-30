@@ -188,10 +188,10 @@ const mapBuilder = () => (size: number) => {
   ];
   return indices
     .map((f) => f(d))
-    .reduce((acc, cur, i) => {
+    .reduce((acc: { [key: number]: string }, cur: number, i) => {
       acc[cur] = features[i];
       return acc;
-    }, {} as any);
+    }, {} satisfies { [key: number]: string });
 };
 // const mapData = [
 //     {type: '⛰️', pos: d => d - 1},
